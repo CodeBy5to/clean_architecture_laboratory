@@ -1,0 +1,57 @@
+server:
+  port: 8080
+spring:
+  codec:
+    max-in-memory-size: "10MB"
+  application:
+    name: "clean_architecture_laboratory"
+  devtools:
+    add-properties: false
+  h2:
+    console:
+      enabled: true
+      path: "/h2"
+  profiles:
+    include: null
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "health,circuitbreakers,prometheus"
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    circuitbreakers:
+      enabled: true
+cors:
+  allowed-origins: "http://localhost:4200,http://localhost:8080"
+adapter:
+  restconsumer:
+    timeout: 2000
+    url: "https://pokeapi.co/api/v2/pokemon/"
+resilience4j:
+  circuitbreaker:
+    instances:
+      getAllPokemonsService:
+        registerHealthIndicator: true
+        failureRateThreshold: 50
+        slowCallRateThreshold: 50
+        slowCallDurationThreshold: "2s"
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 10
+        waitDurationInOpenState: "10s"
+entrypoint:
+  sqs:
+    region: "us-east-1"
+    endpoint: "http://sqs.us-east-1.localhost.localstack.cloud:4566"
+    queueUrl: "http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/test"
+    waitTimeSeconds: 20
+    maxNumberOfMessages: 10
+    visibilityTimeoutSeconds: 10
+    numberOfThreads: 1
+logging:
+  level:
+    io.github.resilience4j.circuitbreaker: DEBUG
