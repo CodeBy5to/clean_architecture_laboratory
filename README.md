@@ -139,6 +139,162 @@ Gracias a la aop y la anocacion intrinseca de @CircuitBreaker, se logra detectar
 
 ```
 
+se evidencia el momento en que se cierra el circuitbreaker cuando muchas peticiones han sido enviadas con el servicio de la pokeApi abajo, se nota como cambia el log de pasar a lanzar excepciones a lo loco, a controlar la ejecución del servicio evitando la ejecucion de un fallo repetitivo
+
+```txt
+org.springframework.web.reactive.function.client.WebClientRequestException: Failed to resolve 'pokeap.co' [A(1)] after 2 queries 
+	at org.springframework.web.reactive.function.client.ExchangeFunctions$DefaultExchangeFunction.lambda$wrapException$9(ExchangeFunctions.java:136) ~[spring-webflux-6.1.12.jar:6.1.12]
+	Suppressed: reactor.core.publisher.FluxOnAssembly$OnAssemblyException: 
+Error has been observed at the following site(s):
+	*__checkpoint ⇢ Request to GET https://pokeap.co/api/v2/pokemon/ [DefaultWebClient]
+Original Stack Trace:
+		at org.springframework.web.reactive.function.client.ExchangeFunctions$DefaultExchangeFunction.lambda$wrapException$9(ExchangeFunctions.java:136) ~[spring-webflux-6.1.12.jar:6.1.12]
+		at reactor.core.publisher.MonoErrorSupplied.subscribe(MonoErrorSupplied.java:55) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.Mono.subscribe(Mono.java:4576) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:103) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.FluxPeek$PeekSubscriber.onError(FluxPeek.java:222) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.MonoNext$NextSubscriber.onError(MonoNext.java:93) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.MonoFlatMapMany$FlatMapManyMain.onError(MonoFlatMapMany.java:205) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.SerializedSubscriber.onError(SerializedSubscriber.java:124) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenMainSubscriber.whenError(FluxRetryWhen.java:229) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenOtherSubscriber.onError(FluxRetryWhen.java:279) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onError(FluxContextWrite.java:121) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.maybeOnError(FluxConcatMapNoPrefetch.java:327) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.onNext(FluxConcatMapNoPrefetch.java:212) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onNext(FluxContextWrite.java:107) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.SinkManyEmitterProcessor.drain(SinkManyEmitterProcessor.java:476) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.SinkManyEmitterProcessor$EmitterInner.drainParent(SinkManyEmitterProcessor.java:620) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.FluxPublish$PubSubInner.request(FluxPublish.java:874) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.request(FluxContextWrite.java:136) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.FluxConcatMapNoPrefetch$FluxConcatMapNoPrefetchSubscriber.request(FluxConcatMapNoPrefetch.java:337) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.request(FluxContextWrite.java:136) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.Operators$DeferredSubscription.request(Operators.java:1743) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.FluxRetryWhen$RetryWhenMainSubscriber.onError(FluxRetryWhen.java:196) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:205) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.netty.http.client.HttpClientConnect$MonoHttpConnect$ClientTransportSubscriber.onError(HttpClientConnect.java:311) ~[reactor-netty-http-1.1.22.jar:1.1.22]
+		at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:205) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.netty.resources.DefaultPooledConnectionProvider$DisposableAcquire.onError(DefaultPooledConnectionProvider.java:172) ~[reactor-netty-core-1.1.22.jar:1.1.22]
+		at reactor.core.publisher.FluxContextWrite$ContextWriteSubscriber.onError(FluxContextWrite.java:121) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.netty.internal.shaded.reactor.pool.AbstractPool$Borrower.fail(AbstractPool.java:480) ~[reactor-netty-core-1.1.22.jar:1.1.22]
+		at reactor.netty.internal.shaded.reactor.pool.SimpleDequePool.lambda$drainLoop$9(SimpleDequePool.java:436) ~[reactor-netty-core-1.1.22.jar:1.1.22]
+		at reactor.core.publisher.FluxDoOnEach$DoOnEachSubscriber.onError(FluxDoOnEach.java:186) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.MonoCreate$DefaultMonoSink.error(MonoCreate.java:205) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.netty.resources.DefaultPooledConnectionProvider$PooledConnectionAllocator$PooledConnectionInitializer.onError(DefaultPooledConnectionProvider.java:583) ~[reactor-netty-core-1.1.22.jar:1.1.22]
+		at reactor.core.publisher.MonoFlatMap$FlatMapMain.secondError(MonoFlatMap.java:241) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.MonoFlatMap$FlatMapInner.onError(MonoFlatMap.java:315) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:106) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.Operators.error(Operators.java:198) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.MonoError.subscribe(MonoError.java:53) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.Mono.subscribe(Mono.java:4576) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.core.publisher.FluxOnErrorResume$ResumeSubscriber.onError(FluxOnErrorResume.java:103) ~[reactor-core-3.6.9.jar:3.6.9]
+		at reactor.netty.transport.TransportConnector$MonoChannelPromise.tryFailure(TransportConnector.java:576) ~[reactor-netty-core-1.1.22.jar:1.1.22]
+		at reactor.netty.transport.TransportConnector.lambda$doResolveAndConnect$11(TransportConnector.java:375) ~[reactor-netty-core-1.1.22.jar:1.1.22]
+		at io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:590) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:557) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:492) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.DefaultPromise.setValue0(DefaultPromise.java:636) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.DefaultPromise.setFailure0(DefaultPromise.java:629) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.DefaultPromise.setFailure(DefaultPromise.java:110) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.resolver.InetSocketAddressResolver$2.operationComplete(InetSocketAddressResolver.java:86) ~[netty-resolver-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:590) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.DefaultPromise.notifyListeners0(DefaultPromise.java:583) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:559) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:492) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.DefaultPromise.setValue0(DefaultPromise.java:636) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.DefaultPromise.setFailure0(DefaultPromise.java:629) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.DefaultPromise.tryFailure(DefaultPromise.java:118) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.resolver.dns.DnsResolveContext.finishResolve(DnsResolveContext.java:1159) ~[netty-resolver-dns-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.resolver.dns.DnsResolveContext.tryToFinishResolve(DnsResolveContext.java:1098) ~[netty-resolver-dns-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.resolver.dns.DnsResolveContext.query(DnsResolveContext.java:457) ~[netty-resolver-dns-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.resolver.dns.DnsResolveContext.onResponse(DnsResolveContext.java:688) ~[netty-resolver-dns-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.resolver.dns.DnsResolveContext.access$500(DnsResolveContext.java:69) ~[netty-resolver-dns-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.resolver.dns.DnsResolveContext$2.operationComplete(DnsResolveContext.java:515) ~[netty-resolver-dns-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:590) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.DefaultPromise.notifyListeners0(DefaultPromise.java:583) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:559) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:492) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.DefaultPromise.setValue0(DefaultPromise.java:636) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.DefaultPromise.setSuccess0(DefaultPromise.java:625) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.DefaultPromise.trySuccess(DefaultPromise.java:105) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.resolver.dns.DnsQueryContext.trySuccess(DnsQueryContext.java:345) ~[netty-resolver-dns-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.resolver.dns.DnsQueryContext.finishSuccess(DnsQueryContext.java:336) ~[netty-resolver-dns-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.resolver.dns.DnsNameResolver$DnsResponseHandler.channelRead(DnsNameResolver.java:1401) ~[netty-resolver-dns-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.handler.codec.MessageToMessageDecoder.channelRead(MessageToMessageDecoder.java:103) ~[netty-codec-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1407) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:918) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.channel.nio.AbstractNioMessageChannel$NioMessageUnsafe.read(AbstractNioMessageChannel.java:97) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:994) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+		at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+Caused by: java.net.UnknownHostException: Failed to resolve 'pokeap.co' [A(1)] after 2 queries 
+	at io.netty.resolver.dns.DnsResolveContext.finishResolve(DnsResolveContext.java:1151) ~[netty-resolver-dns-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.resolver.dns.DnsResolveContext.tryToFinishResolve(DnsResolveContext.java:1098) ~[netty-resolver-dns-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.resolver.dns.DnsResolveContext.query(DnsResolveContext.java:457) ~[netty-resolver-dns-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.resolver.dns.DnsResolveContext.onResponse(DnsResolveContext.java:688) ~[netty-resolver-dns-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.resolver.dns.DnsResolveContext.access$500(DnsResolveContext.java:69) ~[netty-resolver-dns-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.resolver.dns.DnsResolveContext$2.operationComplete(DnsResolveContext.java:515) ~[netty-resolver-dns-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.util.concurrent.DefaultPromise.notifyListener0(DefaultPromise.java:590) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.util.concurrent.DefaultPromise.notifyListeners0(DefaultPromise.java:583) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.util.concurrent.DefaultPromise.notifyListenersNow(DefaultPromise.java:559) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.util.concurrent.DefaultPromise.notifyListeners(DefaultPromise.java:492) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.util.concurrent.DefaultPromise.setValue0(DefaultPromise.java:636) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.util.concurrent.DefaultPromise.setSuccess0(DefaultPromise.java:625) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.util.concurrent.DefaultPromise.trySuccess(DefaultPromise.java:105) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.resolver.dns.DnsQueryContext.trySuccess(DnsQueryContext.java:345) ~[netty-resolver-dns-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.resolver.dns.DnsQueryContext.finishSuccess(DnsQueryContext.java:336) ~[netty-resolver-dns-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.resolver.dns.DnsNameResolver$DnsResponseHandler.channelRead(DnsNameResolver.java:1401) ~[netty-resolver-dns-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.handler.codec.MessageToMessageDecoder.channelRead(MessageToMessageDecoder.java:103) ~[netty-codec-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:444) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.fireChannelRead(AbstractChannelHandlerContext.java:412) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.channel.DefaultChannelPipeline$HeadContext.channelRead(DefaultChannelPipeline.java:1407) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:440) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.channel.AbstractChannelHandlerContext.invokeChannelRead(AbstractChannelHandlerContext.java:420) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.channel.DefaultChannelPipeline.fireChannelRead(DefaultChannelPipeline.java:918) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.channel.nio.AbstractNioMessageChannel$NioMessageUnsafe.read(AbstractNioMessageChannel.java:97) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:788) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562) ~[netty-transport-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:994) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+	at io.netty.util.concurrent.FastThreadLocalRunnable.run(FastThreadLocalRunnable.java:30) ~[netty-common-4.1.112.Final.jar:4.1.112.Final]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[na:na]
+Caused by: io.netty.resolver.dns.DnsErrorCauseException: Query failed with NXDOMAIN
+	at io.netty.resolver.dns.DnsResolveContext.onResponse(..)(Unknown Source) ~[netty-resolver-dns-4.1.112.Final.jar:4.1.112.Final]
+
+2024-09-17T14:21:26.564-05:00 DEBUG 20804 --- [clean_architecture_laboratory] [ctor-http-nio-3] i.g.r.c.i.CircuitBreakerStateMachine     : Event ERROR published: 2024-09-17T14:21:26.564452-05:00[America/Bogota]: CircuitBreaker 'getAllPokemonsService' recorded an error: 'org.springframework.web.reactive.function.client.WebClientRequestException: Failed to resolve 'pokeap.co' [A(1)] after 2 queries '. Elapsed time: 25 ms
+2024-09-17T14:21:26.564-05:00 DEBUG 20804 --- [clean_architecture_laboratory] [ctor-http-nio-3] i.g.r.c.i.CircuitBreakerStateMachine     : Event FAILURE_RATE_EXCEEDED published: 2024-09-17T14:21:26.564452-05:00[America/Bogota]: CircuitBreaker 'getAllPokemonsService' exceeded failure rate threshold. Current failure rate: 100.0
+2024-09-17T14:21:26.567-05:00 DEBUG 20804 --- [clean_architecture_laboratory] [ctor-http-nio-3] i.g.r.c.i.CircuitBreakerStateMachine     : Event STATE_TRANSITION published: 2024-09-17T14:21:26.567451200-05:00[America/Bogota]: CircuitBreaker 'getAllPokemonsService' changed state from CLOSED to OPEN
+2024-09-17T14:21:26.860-05:00 DEBUG 20804 --- [clean_architecture_laboratory] [ctor-http-nio-3] i.g.r.c.i.CircuitBreakerStateMachine     : Event NOT_PERMITTED published: 2024-09-17T14:21:26.860452200-05:00[America/Bogota]: CircuitBreaker 'getAllPokemonsService' recorded a call which was not permitted.
+2024-09-17T14:21:27.207-05:00 DEBUG 20804 --- [clean_architecture_laboratory] [ctor-http-nio-3] i.g.r.c.i.CircuitBreakerStateMachine     : Event NOT_PERMITTED published: 2024-09-17T14:21:27.207451600-05:00[America/Bogota]: CircuitBreaker 'getAllPokemonsService' recorded a call which was not permitted.
+2024-09-17T14:21:27.625-05:00 DEBUG 20804 --- [clean_architecture_laboratory] [ctor-http-nio-3] i.g.r.c.i.CircuitBreakerStateMachine     : Event NOT_PERMITTED published: 2024-09-17T14:21:27.625451400-05:00[America/Bogota]: CircuitBreaker 'getAllPokemonsService' recorded a call which was not permitted.
+2024-09-17T14:21:28.148-05:00 DEBUG 20804 --- [clean_architecture_laboratory] [ctor-http-nio-3] i.g.r.c.i.CircuitBreakerStateMachine     : Event NOT_PERMITTED published: 2024-09-17T14:21:28.148468200-05:00[America/Bogota]: CircuitBreaker 'getAllPokemonsService' recorded a call which was not permitted.
+2024-09-17T14:21:28.610-05:00 DEBUG 20804 --- [clean_architecture_laboratory] [ctor-http-nio-3] i.g.r.c.i.CircuitBreakerStateMachine     : Event NOT_PERMITTED published: 2024-09-17T14:21:28.610468900-05:00[America/Bogota]: CircuitBreaker 'getAllPokemonsService' recorded a call which was not permitted.
+2024-09-17T14:21:29.030-05:00 DEBUG 20804 --- [clean_architecture_laboratory] [ctor-http-nio-3] i.g.r.c.i.CircuitBreakerStateMachine     : Event NOT_PERMITTED published: 2024-09-17T14:21:29.030522700-05:00[America/Bogota]: CircuitBreaker 'getAllPokemonsService' recorded a call which was not permitted.
+
+```
+Se especifica el metodo fallback para que retorne una respueta en base al fallo
+En la url http://localhost:8080/actuator/circuitbreakers se evidencia el estado de los mismos
+
 ```java
 @CircuitBreaker(name = "getAllPokemonsService", fallbackMethod = "fallbackMethod")
 ```
@@ -148,23 +304,22 @@ Gracias a la aop y la anocacion intrinseca de @CircuitBreaker, se logra detectar
         return Flux.just("Service is currently unavailable due to: "+ throwable.getMessage());
     }
 ```
-Se especifica el metodo fallback para que retorne una respueta en base al fallo
-En la url http://localhost:8080/actuator/circuitbreakers se evidencia el estado de los mismos
 
+Se observa como empieza a bloquear los eventos y si vamos a revisar el estado con actuator, veremos la cantidad de rechazos y el estado del circuito
 ```json
 {
   "circuitBreakers": {
     "getAllPokemonsService": {
-      "failureRate": "-1.0%",
-      "slowCallRate": "-1.0%",
+      "failureRate": "100.0%",
+      "slowCallRate": "0.0%",
       "failureRateThreshold": "50.0%",
       "slowCallRateThreshold": "50.0%",
-      "bufferedCalls": 3,
-      "failedCalls": 0,
-      "slowCalls": 1,
+      "bufferedCalls": 10,
+      "failedCalls": 10,
+      "slowCalls": 0,
       "slowFailedCalls": 0,
-      "notPermittedCalls": 0,
-      "state": "CLOSED"
+      "notPermittedCalls": 5,
+      "state": "OPEN"
     },
     "getPokemonByUrlService": {
       "failureRate": "-1.0%",
