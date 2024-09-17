@@ -1,5 +1,5 @@
-# Clean Architecture Laboratory
-Proyecto Springboot con reactor y netty usando el plugin clean architecture de Bancolombia, implementando un adaptador de tipo webclient para consultar datos de la pokeApi agregando el patron circuitbreaker y fallBack. Adicional se implementan 2 entry points uno para exponer los servicios en rest y otro para crear un listener SQS
+# Clean Architecture Laboratory (Hexagonal Architecture, CircuitBreaker, FallBack, Webflux, WebClient, Sqs, Redis)
+Proyecto Springboot con reactor y netty usando el plugin clean architecture de Bancolombia, implementando un adaptador de tipo webclient para consultar datos de la pokeApi agregando el patron circuitbreaker y fallBack. Adicional se implementan 2 entry points uno para exponer los servicios en rest y otro para crear un listener SQS. De igual manera de implementa reactive redis para manejar cache para la gran cantidad de datos.
 
 
 ## Pruebas con reactor
@@ -385,6 +385,57 @@ enviar mensaje con formato definido a la cola
 ```bash
  awslocal sqs send-message --queue-url http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/test --message-body '{"url": "world"}'
 ```
+
+## Redis
+
+Se implementa comunicacion con servidor redis para el almacenamiento de cache en memoria y respuestas dinamicas segun los parametros con menos latencias
+Se realiza cambios al servicio original para consultar con los patrones y parametros datos en redis, se realiza un siwtch para consultar nuevos datos y se insertan con una duración de 1 minuto para pruebas
+
+```java
+    private final ReactiveRedisTemplate<String, Pokemon> reactiveRedisTemplate;
+
+    private final WebClient client;
+
+
+    @Override
+    @Cacheable("getAllPokemonsService")
+    @CircuitBreaker(name = "getAllPokemonsService", fallbackMethod = "fallbackMethod")
+    public Flux<Pokemon> getAllPokemons(Integer limit) {
+
+        //var cacheReference = "pokemon:"+limit;
+        return reactiveRedisTemplate.keys("pokemon"+limit+":*")
+                .flatMap(key -> reactiveRedisTemplate.opsForValue().get(key))
+                .switchIfEmpty(client.get()
+                        .uri("?limit={limit}", limit)
+                        .retrieve()
+                        .bodyToMono(PokemonResponse.class)
+                        .flatMapMany(response -> Flux.fromIterable(response.getResults())
+                                .flatMap(reference -> getPokemonByUrl(reference.getUrl()))))
+                .flatMap(pokemon ->
+                    reactiveRedisTemplate
+                            .opsForValue()
+                            .set("pokemon"+limit+":*" + pokemon.getId(), pokemon,  Duration.ofMinutes(1))
+                )
+                .thenMany(reactiveRedisTemplate
+                        .keys("pokemon"+limit+":*")
+                        .flatMap(key -> reactiveRedisTemplate.opsForValue().get(key)));
+    }
+```
+
+prueba con 1000 datos y comparacion de latencias
+
+1000 datos sin persistencia en redis<br>
+![image](https://github.com/user-attachments/assets/7a4de058-f8f1-4306-ab55-61c74ab825df)<br>
+
+1000 datos con persistencia en redis<br>
+![image](https://github.com/user-attachments/assets/59c5f96c-7cb7-46bb-ac19-f8809c193255)<br>
+
+
+servidor redis (local)<br>
+![image](https://github.com/user-attachments/assets/96a3d7bd-a1fb-48dc-b20e-6b7c33235fd9)<br>
+![image](https://github.com/user-attachments/assets/c815796b-bc66-4dbe-af21-93ab0c0e6ac6)<br>
+
+
 
 
 ## Arquitectura limpia Bancolombia
