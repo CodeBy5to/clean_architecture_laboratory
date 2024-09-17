@@ -5,27 +5,46 @@ import com.github.codeby5to.model.pokemon.Pokemon;
 import com.github.codeby5to.model.pokemon.gateways.PokemonRepository;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.ReactiveRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+
 @Service
 @RequiredArgsConstructor
 public class PokemonService implements PokemonRepository {
+
+    private final ReactiveRedisTemplate<String, Pokemon> reactiveRedisTemplate;
 
     private final WebClient client;
 
 
     @Override
+    @Cacheable("getAllPokemonsService")
     @CircuitBreaker(name = "getAllPokemonsService", fallbackMethod = "fallbackMethod")
     public Flux<Pokemon> getAllPokemons(Integer limit) {
-        return Flux.defer(() -> client.get()
-                .uri("?limit={limit}", limit)
-                .retrieve()
-                .bodyToMono(PokemonResponse.class)
-                .flatMapMany(response -> Flux.fromIterable(response.getResults())
-                        .flatMap(reference -> getPokemonByUrl(reference.getUrl()))));
+
+        //var cacheReference = "pokemon:"+limit;
+        return reactiveRedisTemplate.keys("pokemon"+limit+":*")
+                .flatMap(key -> reactiveRedisTemplate.opsForValue().get(key))
+                .switchIfEmpty(client.get()
+                        .uri("?limit={limit}", limit)
+                        .retrieve()
+                        .bodyToMono(PokemonResponse.class)
+                        .flatMapMany(response -> Flux.fromIterable(response.getResults())
+                                .flatMap(reference -> getPokemonByUrl(reference.getUrl()))))
+                .flatMap(pokemon ->
+                    reactiveRedisTemplate
+                            .opsForValue()
+                            .set("pokemon"+limit+":*" + pokemon.getId(), pokemon,  Duration.ofMinutes(1))
+                )
+                .thenMany(reactiveRedisTemplate
+                        .keys("pokemon"+limit+":*")
+                        .flatMap(key -> reactiveRedisTemplate.opsForValue().get(key)));
     }
 
     @Override

@@ -7,10 +7,7 @@ import lombok.*;
 
 @Getter
 @Setter
-//@NoArgsConstructor
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder(toBuilder = true)
 @ToString
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Pokemon {
