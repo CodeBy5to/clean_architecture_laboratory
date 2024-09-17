@@ -17,9 +17,4 @@ public class Handler {
         return ServerResponse.ok().body(useCase.getAllPokemon(Integer.parseInt(serverRequest
                 .queryParam("limit").orElse("20"))), Pokemon.class);
     }
-
-    public Mono<ServerResponse> getByUrlPokemonUseCase(ServerRequest serverRequest) {
-        return ServerResponse.ok().bodyValue(useCase.getPokemonByUrl(serverRequest.queryParam("url")
-                .orElse("")));
-    }
 }

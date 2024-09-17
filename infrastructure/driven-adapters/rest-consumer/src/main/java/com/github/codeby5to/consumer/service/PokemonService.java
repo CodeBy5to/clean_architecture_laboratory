@@ -29,15 +29,20 @@ public class PokemonService implements PokemonRepository {
     }
 
     @Override
+    @CircuitBreaker(name = "getPokemonByUrlService", fallbackMethod = "fallbackMethod2")
     public Mono<Pokemon> getPokemonByUrl(String url) {
         return client.get()
-                .uri("/{id}", url.split("/").length > 6 ? url.split("/")[6] : "1")
+                .uri("/{id}", url.split("/").length > 6 ? url.split("/")[6] : "0")
                 .retrieve()
                 .bodyToMono(Pokemon.class);
     }
 
     public Flux<String> fallbackMethod(Throwable throwable) {
         return Flux.just("Service is currently unavailable due to: "+ throwable.getMessage());
+    }
+
+    public Mono<String> fallbackMethod2(Throwable throwable) {
+        return Mono.just("Service is currently unavailable due to: "+ throwable.getMessage());
     }
 
 }

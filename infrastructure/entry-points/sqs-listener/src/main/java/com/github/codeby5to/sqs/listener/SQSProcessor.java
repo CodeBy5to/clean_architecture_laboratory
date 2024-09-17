@@ -24,10 +24,17 @@ public class SQSProcessor implements Function<Message, Mono<Void>> {
         try {
             query = mapper.readValue(message.body(), PokemonQuery.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+
+            System.out.println(e.getMessage());
+
+            return Mono.empty();
         }
         System.out.println(query.toString());
-        useCase.getPokemonByUrl(query.getUrl()).doOnNext(pokemon -> System.out.println(pokemon.toString()));
+
+        useCase.getPokemonByUrl(query.getUrl())
+                .doOnNext(pokemon -> System.out.println(pokemon.toString()))
+                .doOnError(throwable -> System.out.println("Error al obtener el Pokémon: $throwable"))
+                .subscribe();
         return Mono.empty();
     }
 }
